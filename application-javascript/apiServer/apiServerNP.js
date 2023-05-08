@@ -89,11 +89,13 @@ app.post('/api/create/',async function(req, res) {
 			
 			console.log(res.json);
 			console.log('\n--> Transação em andamento: CreateAsset, criação de novo MSISDN'+msisdn);
-			let result = await contract.evaluateTransaction('CreateAsset', req.body.msisdn, req.body.nome,req.body.cpf,req.body.mccmnc, req.body.operadora);
+			let result = await contract.submitTransaction('CreateAsset', req.body.msisdn, req.body.nome,req.body.cpf,req.body.mccmnc, req.body.operadora);
 			
 //await contract.submitTransaction('createCar', req.body.carid, req.body.make, req.body.model, req.body.colour, req.body.owner);
 
 			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+			res.status(200).json({response: `*** Resultado: ${prettyJSONString(result.toString())}`});
+
 
        // Disconnect from the gateway.
         await gateway.disconnect();
@@ -135,20 +137,25 @@ app.post('/api/transfer/',async function(req, res) {
 			const msisdn = req.body.msisdn;
 			const newMccmnc = req.body.newMccmnc;
 			const novaOper = req.body.newOperadora
-			
-			
+						
 			console.log(req.body);
 			
-			//console.log(res.json);
-			//msisdn, newMccmnc, newOperadora
 			console.log('\n--> Transação em andamento: TransferAsset, Execução da Portabilidade MSISDN '+msisdn+' nova operadora '+novaOper);
-			let result = await contract.submitTransaction('TransferAsset', msisdn, newMccmnc,novaOper);
-			console.log('\n--> *** Resultado: Portabilidade Concluida com sucesso');
-			res.status(200).json({response: `*** Resultado: ${prettyJSONString(result.toString())}`});
-
-			//res.status(200).json({response: `*** Resultado: Portabilidade Concluida com sucesso`});
 			
-       // Disconnect from the gateway.
+			let result = await contract.evaluateTransaction('ReadAsset', req.body.msisdn.toString());
+			const resultTxt =  prettyJSONString(result.toString())
+			console.log(resultTxt);
+			await contract.submitTransaction('TransferAsset', msisdn, newMccmnc,novaOper);
+			console.log('\n--> *** Resultado: Portabilidade Concluida com sucesso');
+			let result2 =  await contract.evaluateTransaction('ReadAsset', req.body.msisdn.toString()); 
+			const resultTxt2 =  prettyJSONString(result2.toString())
+			console.log(resultTxt2);
+				
+			const finalResult = resultTxt.concat("\n",resultTxt2);
+
+			res.status(200).json({response: `*** Resultado: Portabilidade concluída com sucesso ${finalResult}`});
+		
+       // Desconectar do gateway.
         await gateway.disconnect();
 
 } catch (error) {
@@ -226,7 +233,6 @@ app.get('/api/query/:MSISDN_index', async function (req, res) {
 
 app.post('/api/initledger/', async function (req, res) {
     try {
-
      // construir um objeto em memória com a configuração da rede (Connection Profile)
 		const ccp = buildCCPOrg1();
 
@@ -245,18 +251,17 @@ app.post('/api/initledger/', async function (req, res) {
 		await gateway.connect(ccp, {
 				wallet,
 				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+				discovery: { enabled: true, asLocalhost: true } // utiliza asLocalhost: true para a rede fabric impementada localmente.
 			});
 
 			const network = await gateway.getNetwork(channelName);
-
 			const contract = network.getContract(chaincodeName);
 				
 			await contract.submitTransaction('InitLedger'); 
-			console.log('*** Result: committed');
-			res.status(200).json({Response: "Result : Commited"})
+			console.log('*** Resultado: inicialização completa');
+			res.status(200).json({Response: "Resultado: inicialização completa"})
 		
-       // Disconnect from the gateway.
+       // Desconectar do gateway.
         await gateway.disconnect();
 
 } catch (error) {

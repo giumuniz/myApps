@@ -9,91 +9,48 @@
 const { Contract } = require('fabric-contract-api');
 
 class AssetTransfer extends Contract {
-
+    // Carrega um lista inicial de usuários
     async InitLedger(ctx) {
-        /*const assets = [
-            {
-                ID: 'asset1',
-                Color: 'blue',
-                Size: 5,
-                Owner: 'Tomoko',
-                AppraisedValue: 300,
-            },
-            {
-                ID: 'asset2',
-                Color: 'red',
-                Size: 5,
-                Owner: 'Brad',
-                AppraisedValue: 400,
-            },
-            {
-                ID: 'asset3',
-                Color: 'green',
-                Size: 10,
-                Owner: 'Jin Soo',
-                AppraisedValue: 500,
-            },
-            {
-                ID: 'asset4',
-                Color: 'yellow',
-                Size: 10,
-                Owner: 'Max',
-                AppraisedValue: 600,
-            },
-            {
-                ID: 'asset5',
-                Color: 'black',
-                Size: 15,
-                Owner: 'Adriana',
-                AppraisedValue: 700,
-            },
-            {
-                ID: 'asset6',
-                Color: 'white',
-                Size: 15,
-                Owner: 'Michel',
-                AppraisedValue: 800,
-            }, */
-			
+        		
 			const assets = [
             {
                 MSISDN: '02123456789',
-				NOME: 'Austragesilo de Atadide',
+				NOME: 'Bodhidharma Cohesive',
 				CPF: '12345678910',
 				MCCMNC: 74512,
 				OPERADORA: 'OI',
             },
             {
                 MSISDN: '02123456788',
-				NOME: 'Atadide de Austragesilo',
+				NOME: 'Norwegian Rubbers',
 				CPF: '12345678911',
 				MCCMNC: 74520,
 				OPERADORA: 'VIVO',
             },
             {
                 MSISDN: '02123456787',
-				NOME: 'Gongonzolina Hermogena',
+				NOME: 'Mosaic Peppered',
 				CPF: '12345678912',
 				MCCMNC: 74530,
 				OPERADORA: 'CLARO',
             },
             {
                 MSISDN: '02123456786',
-				NOME: 'Hermogena Gongonzolina',
+				NOME: 'Assiduous Revere',
 				CPF: '12345678913',
 				MCCMNC: 74540,
 				OPERADORA: 'SERCONTEL',
             },
             {
                 MSISDN: '02123456785',
-				NOME: 'Astrelopitecus Robustus',
+				NOME: 'Delegated Waitresses',
 				CPF: '12345678914',
 				MCCMNC: 74550,
 				OPERADORA: 'SURF',
             },
             {
                 MSISDN: '02123456784',
-				NOME: 'Josebes Gallobe',
+				NOME: 'Hotpoint Highlander',
 				CPF: '12345678915',
 				MCCMNC: 74560,
 				OPERADORA: 'BRISANET',
@@ -103,21 +60,12 @@ class AssetTransfer extends Contract {
         for (const asset of assets) {
             asset.docType = 'asset';
             await ctx.stub.putState(asset.MSISDN, Buffer.from(JSON.stringify(asset)));
-            console.info(`Asset ${asset.ID} initialized`);
+            console.info(`Asset ${asset.MSISDN} initialized`);
         }
     }
-
-    // CreateAsset issues a new asset to the world state with given details.
+    // CreateAsset cria novo usuário no estado global (world state) com os detalhes fornecidos.
     async CreateAsset(ctx, msisdn, nome, cpf, mccmnc, operadora) {
         const asset = {
-            
-			/*
-			ID: id,
-            Color: color,
-            Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,
-			*/
 			MSISDN: msisdn,
 			NOME: nome,
 			CPF: cpf,
@@ -128,29 +76,24 @@ class AssetTransfer extends Contract {
         return JSON.stringify(asset);
     }
 
-    // ReadAsset returns the asset stored in the world state with given id.
+    // ReadAsset retorna um usuário registrado, a partir do MSISDN fornecido .
     async ReadAsset(ctx, msisdn) {
-        const assetJSON = await ctx.stub.getState(msisdn); // get the asset from chaincode state
+        const assetJSON = await ctx.stub.getState(msisdn);
         if (!assetJSON || assetJSON.length === 0) {
-            throw new Error(`The asset ${id} does not exist`);
+            throw new Error(`O usuário ${msisdn} não existe`);
         }
         return assetJSON.toString();
     }
 
-    // UpdateAsset updates an existing asset in the world state with provided parameters.
+    // UpdateAsset atualiza um usuário existente conforme os parâmentros fornecidos.
     async UpdateAsset(ctx, msisdn, nome, cpf, mccmnc, operadora) {
         const exists = await this.AssetExists(ctx, msisdn);
         if (!exists) {
-            throw new Error(`The asset ${msisdn} does not exist`);
+            throw new Error(`O usuário ${msisdn} não existe`);
         }
 
-        // overwriting original asset with new asset
+        // Sobrescrevendo o usuário original com os novos parâmetros
         const updatedAsset = {
-            /*ID: id,
-            Color: color,
-            Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,*/
 			MSISDN: msisdn,
 			NOME: nome,
 			CPF: cpf,
@@ -160,22 +103,22 @@ class AssetTransfer extends Contract {
         return ctx.stub.putState(msisdn, Buffer.from(JSON.stringify(updatedAsset)));
     }
 
-    // DeleteAsset deletes an given asset from the world state.
+    // DeleteAsset remove um usuário existente conforme o parâmetro MSISDN fornecido.
     async DeleteAsset(ctx, msisdn) {
         const exists = await this.AssetExists(ctx, msisdn);
         if (!exists) {
-            throw new Error(`The asset ${msisdn} does not exist`);
+            throw new Error(`O usuário ${msisdn} não existe`);
         }
         return ctx.stub.deleteState(msisdn);
     }
 
-    // AssetExists returns true when asset with given ID exists in world state.
+    // AssetExists retorna true quando um usuário com o MSISDN fornecido existe no estado glogal (world state).
     async AssetExists(ctx, msisdn) {
         const assetJSON = await ctx.stub.getState(msisdn);
         return assetJSON && assetJSON.length > 0;
     }
 
-    // TransferAsset updates the owner field of asset with given id in the world state.
+    // TransferAsset atualiza os dados do usuário com o MSISDN fornecido.
     async TransferAsset(ctx, msisdn, newMccmnc, newOperadora) {
         const assetString = await this.ReadAsset(ctx, msisdn);
         const asset = JSON.parse(assetString);
@@ -184,10 +127,10 @@ class AssetTransfer extends Contract {
         return ctx.stub.putState(msisdn, Buffer.from(JSON.stringify(asset)));
     }
 
-    // GetAllAssets returns all assets found in the world state.
+    // GetAllAssets retorna todos os usuários existentes no estado global (world state).
     async GetAllAssets(ctx) {
         const allResults = [];
-        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        
         const iterator = await ctx.stub.getStateByRange('', '');
         let result = await iterator.next();
         while (!result.done) {
@@ -204,8 +147,6 @@ class AssetTransfer extends Contract {
         }
         return JSON.stringify(allResults);
     }
-
-
 }
 
 module.exports = AssetTransfer;

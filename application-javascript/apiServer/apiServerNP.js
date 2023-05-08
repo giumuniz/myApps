@@ -47,57 +47,30 @@ app.post('/api/teste/',async function(req, res) {
 
 app.post('/api/create/',async function(req, res) {
     try {
-
-      // build an in memory object with the network configuration (also known as a connection profile)
-		const ccp = buildCCPOrg1();
-
-		// build an instance of the fabric ca services client based on
-		// the information in the network configuration
+      	const ccp = buildCCPOrg1();
 		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-
-		// setup the wallet to hold the credentials of the application user
 		const wallet = await buildWallet(Wallets, walletPath);
-
-		// in a real application this would be done on an administrative flow, and only once
-		//await enrollAdmin(caClient, wallet, mspOrg1);
-
-		// in a real application this would be done only when a new user was required to be added
-		// and would be part of an administrative flow
-		//await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-		//CRiação da instância de um gateway para interação com a rede Fabric-test
 		const gateway = new Gateway();
-		
-		
+				
 			await gateway.connect(ccp, {
 				wallet,
 				identity: org1UserId,
 				discovery: { enabled: true, asLocalhost: true } 
 			});
 
-			// Cria uma instância do da rede fabric-test baseada no canal onde o chaincode foi implementado.
 			const network = await gateway.getNetwork(channelName);
-
 			const contract = network.getContract(chaincodeName);
 			
 			const msisdn = req.body.msisdn;
 			const nome = req.body.nome;
 			
-			
-			console.log(req.body);
-			res.json(req.body);
-			
 			console.log(res.json);
 			console.log('\n--> Transação em andamento: CreateAsset, criação de novo MSISDN'+msisdn);
 			let result = await contract.submitTransaction('CreateAsset', req.body.msisdn, req.body.nome,req.body.cpf,req.body.mccmnc, req.body.operadora);
 			
-//await contract.submitTransaction('createCar', req.body.carid, req.body.make, req.body.model, req.body.colour, req.body.owner);
-
 			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
 			res.status(200).json({response: `*** Resultado: ${prettyJSONString(result.toString())}`});
 
-
-       // Disconnect from the gateway.
         await gateway.disconnect();
 
 } catch (error) {
@@ -110,28 +83,7 @@ app.post('/api/create/',async function(req, res) {
 app.post('/api/transfer/',async function(req, res) {
     try {
 
-      // build an in memory object with the network configuration (also known as a connection profile)
-		const ccp = buildCCPOrg1();
-
-		// build an instance of the fabric ca services client based on
-		// the information in the network configuration
-		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-
-		// setup the wallet to hold the credentials of the application user
-		const wallet = await buildWallet(Wallets, walletPath);
-
-		const gateway = new Gateway();
-		
-		
-			await gateway.connect(ccp, {
-				wallet,
-				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true } 
-			});
-
-			// Cria uma instância do da rede fabric-test baseada no canal onde o chaincode foi implementado.
 			const network = await gateway.getNetwork(channelName);
-
 			const contract = network.getContract(chaincodeName);
 			
 			const msisdn = req.body.msisdn;
@@ -139,7 +91,6 @@ app.post('/api/transfer/',async function(req, res) {
 			const novaOper = req.body.newOperadora
 						
 			console.log(req.body);
-			
 			console.log('\n--> Transação em andamento: TransferAsset, Execução da Portabilidade MSISDN '+msisdn+' nova operadora '+novaOper);
 			
 			let result = await contract.evaluateTransaction('ReadAsset', req.body.msisdn.toString());
@@ -154,8 +105,7 @@ app.post('/api/transfer/',async function(req, res) {
 			const finalResult = resultTxt.concat("\n",resultTxt2);
 
 			res.status(200).json({response: `*** Resultado: Portabilidade concluída com sucesso ${finalResult}`});
-		
-       // Desconectar do gateway.
+
         await gateway.disconnect();
 
 } catch (error) {
@@ -169,59 +119,27 @@ app.post('/api/transfer/',async function(req, res) {
 app.get('/api/query/:MSISDN_index', async function (req, res) {
     try {
 
-      // build an in memory object with the network configuration (also known as a connection profile)
 		const ccp = buildCCPOrg1();
-
-		// build an instance of the fabric ca services client based on
-		// the information in the network configuration
 		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-
-		// setup the wallet to hold the credentials of the application user
 		const wallet = await buildWallet(Wallets, walletPath);
-
-		// in a real application this would be done on an administrative flow, and only once
-		//await enrollAdmin(caClient, wallet, mspOrg1);
-
-		// in a real application this would be done only when a new user was required to be added
-		// and would be part of an administrative flow
-		//await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-		// Create a new gateway instance for interacting with the fabric network.
-		// In a real application this would be done as the backend server session is setup for
-		// a user that has been verified.
 		const gateway = new Gateway();
-		
-		// setup the gateway instance
-			// The user will now be able to create connections to the fabric network and be able to
-			// submit transactions and query. All transactions submitted by this gateway will be
-			// signed by this user using the credentials stored in the wallet.
 			await gateway.connect(ccp, {
 				wallet,
 				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+				discovery: { enabled: true, asLocalhost: true }
 			});
 
-			// Build a network instance based on the channel where the smart contract is deployed
 			const network = await gateway.getNetwork(channelName);
-
-			// Get the contract from the network.
 			const contract = network.getContract(chaincodeName);
-			
 						
 			const msisdn = req.params.MSISDN_index; 
-			
-			console.log(`Parametro da entrada ${req.params.MSISDN_index}`)
-			
-			console.log(`\n--> Evaluate Transaction: ReadAsset, function returns an asset with a given MSISDN' ${req.params.MSISDN_index}`);
+			console.log(`\n--> Transação em andamento: ReadAsset, função retorna um usuário para um dado MSISDN' ${req.params.MSISDN_index}`);
 			
 			let result = await contract.evaluateTransaction('ReadAsset', req.params.MSISDN_index.toString()); 
-			//, req.body.nome,req.body.cpf, req.body.mccmnc, req.body.operadora);
-			//result = await contract.evaluateTransaction('ReadAsset', '02123456785');
 			console.log(`*** Resultado: ${result.toString()}`);
-			//console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
 			res.status(200).json({response: `*** Resultado: ${prettyJSONString(result.toString())}`});
 
-       // Disconnect from the gateway.
         await gateway.disconnect();
 
 } catch (error) {
@@ -243,7 +161,6 @@ app.post('/api/initledger/', async function (req, res) {
 		const wallet = await buildWallet(Wallets, walletPath);
 
 		await enrollAdmin(caClient, wallet, mspOrg1);
-
 		await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
 
 		const gateway = new Gateway();
@@ -265,7 +182,7 @@ app.post('/api/initledger/', async function (req, res) {
         await gateway.disconnect();
 
 } catch (error) {
-        console.error(`Failed to evaluate transaction: ${error}`);
+        console.error(`Falha em executar esta transação: ${error}`);
         res.status(500).json({error: error});
         process.exit(1);
     }
@@ -274,55 +191,24 @@ app.post('/api/initledger/', async function (req, res) {
 app.get('/api/queryAll/', async function (req, res) {
     try {
 
-      // build an in memory object with the network configuration (also known as a connection profile)
 		const ccp = buildCCPOrg1();
-
-		// build an instance of the fabric ca services client based on
-		// the information in the network configuration
 		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-
-		// setup the wallet to hold the credentials of the application user
 		const wallet = await buildWallet(Wallets, walletPath);
-
-		// in a real application this would be done on an administrative flow, and only once
-		//await enrollAdmin(caClient, wallet, mspOrg1);
-
-		// in a real application this would be done only when a new user was required to be added
-		// and would be part of an administrative flow
-		//await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-		// Create a new gateway instance for interacting with the fabric network.
-		// In a real application this would be done as the backend server session is setup for
-		// a user that has been verified.
 		const gateway = new Gateway();
-		
-		// setup the gateway instance
-			// The user will now be able to create connections to the fabric network and be able to
-			// submit transactions and query. All transactions submitted by this gateway will be
-			// signed by this user using the credentials stored in the wallet.
 			await gateway.connect(ccp, {
 				wallet,
 				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+				discovery: { enabled: true, asLocalhost: true }
 			});
 
-			// Build a network instance based on the channel where the smart contract is deployed
 			const network = await gateway.getNetwork(channelName);
-
-			// Get the contract from the network.
 			const contract = network.getContract(chaincodeName);
 			
 			console.log(`\n--> Read All`);
 			
 			let result = await contract.evaluateTransaction('GetAllAssets'); 
-			//, req.body.nome,req.body.cpf, req.body.mccmnc, req.body.operadora);
-			//result = await contract.evaluateTransaction('ReadAsset', '02123456785');
 			console.log(`*** Result: ${result.toString()}`);
 			res.status(200).json({response: `*** Result: ${prettyJSONString(result.toString())}`});
-			//console.log(`*** Result: ${prettyJSONString(result.toString())}`);
-
-
-       // Disconnect from the gateway.
         await gateway.disconnect();
 
 } catch (error) {

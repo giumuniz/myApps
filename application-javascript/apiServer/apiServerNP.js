@@ -59,6 +59,8 @@ app.post('/api/create/',async function(req, res) {
 			});
 
 			const network = await gateway.getNetwork(channelName);
+			
+			//Carrega o Smart contract - Chaincode
 			const contract = network.getContract(chaincodeName);
 			
 			const msisdn = req.body.msisdn;
@@ -66,9 +68,9 @@ app.post('/api/create/',async function(req, res) {
 			
 			console.log(res.json);
 			console.log('\n--> Transação em andamento: CreateAsset, criação de novo MSISDN'+msisdn);
-			let result = await contract.submitTransaction('CreateAsset', req.body.msisdn, req.body.nome,req.body.cpf,req.body.mccmnc, req.body.operadora);
+			let result = await contract.submitTransaction('CreateAsset',req.body.msisdn, req.body.nome,req.body.cpf,req.body.mccmnc, req.body.operadora);
 			
-			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+			console.log(`*** Resultado: ${prettyJSONString(result.toString())}`);
 			res.status(200).json({response: `*** Resultado: ${prettyJSONString(result.toString())}`});
 
         await gateway.disconnect();
@@ -151,7 +153,7 @@ app.get('/api/query/:MSISDN_index', async function (req, res) {
 
 app.post('/api/initledger/', async function (req, res) {
     try {
-     // construir um objeto em memória com a configuração da rede (Connection Profile)
+        // construir um objeto em memória com a configuração da rede (Connection Profile)
 		const ccp = buildCCPOrg1();
 
 		// construir uma instância do cliente de serviços fabric CA com base nas informações na configuração da rede

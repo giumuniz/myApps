@@ -10,7 +10,8 @@ export PATH=/home/userApp/fabric-samples/bin:$PATH
 
 userApp@MB3BWebApp:~/fabric-samples$ sudo curl -X GET http://admin:adminpw@127.0.0.1:5984/_all_dbs
 
-
+DB
+http://20.226.43.232:5984/_utils/#database/mychannel_basic/_all_docs
 
 ssh userApp@20.226.43.232
 
@@ -20,6 +21,7 @@ ssh userApp@20.226.87.136
 S3nh51s3r5pp
 
 find / -name couchDBconfig
+find ./* -type f -exec grep -l STRINGDEPROCURA {} \; 
 
 docker network ls
 
@@ -34,6 +36,11 @@ export CORE_PEER_ADDRESS=localhost:7051
 
 peer chaincode query -C mychannel -n basic -c '{"Args":["GetAllAssets"]}'
 
+Baixar bloco full
+peer channel fetch newest mychannel.block -c mychannel --orderer orderer.example.com:7050
+
+baixar bloco 16 e salva onde rodou
+peer channel fetch 06 -c mychannel
 
 configuração para o Docker
 https://hub.docker.com/r/hyperledger/fabric-peer
@@ -41,6 +48,9 @@ https://hub.docker.com/r/hyperledger/fabric-peer
 
 consenser x Follower  and Active x onboarding
 https://hyperledger-fabric.readthedocs.io/en/release-2.5/create_channel/create_channel_test_net.html
+
+Dados do docker
+compose/compose-test-net.yaml
 
 
 problema no anchor peer

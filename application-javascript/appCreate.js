@@ -108,7 +108,7 @@ async function main() {
 			}
 
 		} finally {
-			// Disconecta da rede
+			// Desconecta da rede
 			gateway.disconnect();
 		}
 	} catch (error) {

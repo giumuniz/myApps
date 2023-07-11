@@ -114,7 +114,7 @@ app.post('/api/transfer/',async function(req, res) {
 				
 			const finalResult = resultTxt.concat("\n",resultTxt2);
 
-			res.status(200).json({response: `*** Resultado: Portabilidade concluída com sucesso ${finalResult}`});
+			res.status(200).json({response: `**** Resultado: Portabilidade concluída com sucesso ${finalResult}`});
 
         await gateway.disconnect();
 
